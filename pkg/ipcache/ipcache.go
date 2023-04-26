@@ -14,6 +14,7 @@ import (
 
 	cmtypes "github.com/cilium/cilium/pkg/clustermesh/types"
 	"github.com/cilium/cilium/pkg/controller"
+	"github.com/cilium/cilium/pkg/counter"
 	"github.com/cilium/cilium/pkg/identity"
 	"github.com/cilium/cilium/pkg/identity/cache"
 	ipcacheTypes "github.com/cilium/cilium/pkg/ipcache/types"
@@ -128,6 +129,10 @@ type IPCache struct {
 	// references to identities and removing the corresponding IPCache
 	// entries if unused.
 	deferredPrefixRelease *asyncPrefixReleaser
+
+	// prefixLengths tracks the unique set of prefix lengths for IPv4 and
+	// IPv6 addresses in order to optimize longest prefix match lookups.
+	prefixLengths *counter.PrefixLengthCounter
 }
 
 // NewIPCache returns a new IPCache with the mappings of endpoint IP to security
@@ -142,6 +147,7 @@ func NewIPCache(c *Configuration) *IPCache {
 		controllers:       controller.NewManager(),
 		namedPorts:        types.NewNamedPortMultiMap(),
 		metadata:          newMetadata(),
+		prefixLengths:     counter.DefaultPrefixLengthCounter(),
 		Configuration:     c,
 	}
 	ipc.deferredPrefixRelease = newAsyncPrefixReleaser(c.Context, ipc, 1*time.Millisecond)
@@ -360,6 +366,7 @@ func (ipc *IPCache) upsertLocked(
 				newIdentity.shadowed = true
 			}
 		}
+		ipc.prefixLengths.Add([]netip.Prefix{cidrCluster.AsPrefix()})
 	} else if addrCluster, err := cmtypes.ParseAddrCluster(ip); err == nil { // Endpoint IP or Endpoint IP with ClusterID
 		cidrCluster = addrCluster.AsPrefixCluster()
 
@@ -382,6 +389,7 @@ func (ipc *IPCache) upsertLocked(
 				}
 			}
 		}
+		ipc.prefixLengths.Add([]netip.Prefix{cidrCluster.AsPrefix()})
 	} else {
 		log.WithFields(logrus.Fields{
 			logfields.AddrCluster: ip,
@@ -613,6 +621,7 @@ func (ipc *IPCache) deleteLocked(ip string, source source.Source) (namedPortsCha
 			scopedLog.Debug("Deleting CIDR shadowed by endpoint IP")
 			callbackListeners = false
 		}
+		ipc.prefixLengths.Delete([]netip.Prefix{cidrCluster.AsPrefix()})
 	} else if addrCluster, err := cmtypes.ParseAddrCluster(ip); err == nil { // Endpoint IP or Endpoint IP with ClusterID
 		// Convert the endpoint IP into an equivalent full CIDR.
 		cidrCluster = addrCluster.AsPrefixCluster()
@@ -635,6 +644,7 @@ func (ipc *IPCache) deleteLocked(ip string, source source.Source) (namedPortsCha
 				callbackListeners = false
 			}
 		}
+		ipc.prefixLengths.Delete([]netip.Prefix{cidrCluster.AsPrefix()})
 	} else {
 		scopedLog.Error("Attempt to delete invalid IP from ipcache layer")
 		metrics.IPCacheErrorsTotal.WithLabelValues(
