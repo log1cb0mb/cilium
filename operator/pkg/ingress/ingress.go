@@ -89,6 +89,7 @@ type Controller struct {
 	enabledSecretsSync      bool
 	secretsNamespace        string
 	lbAnnotationPrefixes    []string
+	lbLabelPrefixes         []string
 	sharedLBServiceName     string
 	ciliumNamespace         string
 	defaultLoadbalancerMode string
@@ -116,6 +117,7 @@ func NewController(clientset k8sClient.Clientset, options ...Option) (*Controlle
 		enabledSecretsSync:      opts.EnabledSecretsSync,
 		secretsNamespace:        opts.SecretsNamespace,
 		lbAnnotationPrefixes:    opts.LBAnnotationPrefixes,
+		lbLabelPrefixes:         opts.LBLabelPrefixes,
 		sharedLBServiceName:     opts.SharedLBServiceName,
 		ciliumNamespace:         opts.CiliumNamespace,
 		defaultLoadbalancerMode: opts.DefaultLoadbalancerMode,
@@ -610,8 +612,8 @@ func (ic *Controller) regenerate(ing *slim_networkingv1.Ingress, forceShared boo
 		"model":        m,
 	}).Debug("Generated model for ingress")
 	cec, svc, ep, err := translator.Translate(m)
-	// Propagate Ingress annotation if required. This is applicable only for dedicated LB mode.
-	// For shared LB mode, the service annotation is defined in other higher level (e.g. helm).
+	// Propagate Ingress annotation and label if required. This is applicable only for dedicated LB mode.
+	// For shared LB mode, the service annotation and label are defined in other higher level (e.g. helm).
 	if svc != nil {
 		for key, value := range ing.GetAnnotations() {
 			for _, prefix := range ic.lbAnnotationPrefixes {
@@ -620,9 +622,23 @@ func (ic *Controller) regenerate(ing *slim_networkingv1.Ingress, forceShared boo
 						svc.Annotations = make(map[string]string)
 					}
 					svc.Annotations[key] = value
+					// svc.Labels[key] = value
 				}
 			}
 		}
+		for key, value := range ing.GetLabels() {
+			for _, prefix := range ic.lbLabelPrefixes {
+				if strings.HasPrefix(key, prefix) {
+					if svc.Labels == nil {
+						svc.Labels = make(map[string]string)
+					}
+					svc.Labels[key] = value
+				}
+			}
+		}
+		// for key, value := range ing.GetLabels() {
+		// 	svc.Labels[key] = value
+		// }
 	}
 	scopedLog.WithFields(logrus.Fields{
 		"ciliumEnvoyConfig": cec,

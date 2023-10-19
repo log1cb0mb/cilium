@@ -705,6 +705,10 @@ ingressController:
   # from Ingress to the Load Balancer service
   ingressLBAnnotationPrefixes: ['service.beta.kubernetes.io', 'service.kubernetes.io', 'cloud.google.com']
 
+  # -- IngressLBLabels are the label prefixes, which are used to filter labels to propagate
+  # from Ingress to the Load Balancer service
+  ingressLBLabelPrefixes: ['service.beta.kubernetes.io', 'service.kubernetes.io', 'cloud.google.com']
+
   # -- Default secret namespace for ingresses without .spec.tls[].secretName set.
   defaultSecretNamespace:
 

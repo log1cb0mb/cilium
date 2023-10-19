@@ -23,6 +23,12 @@ var testAnnotations = map[string]string{
 	"service.alpha.kubernetes.io/dummy-load-balancer-access-log-enabled": "true",
 }
 
+var testLabels = map[string]string{
+	"service.beta.kubernetes.io/dummy-load-balancer-backend-protocol":    "http",
+	"service.beta.kubernetes.io/dummy-load-balancer-access-log-enabled":  "true",
+	"service.alpha.kubernetes.io/dummy-load-balancer-access-log-enabled": "true",
+}
+
 var defaultSecretNamespace = "default-secret-namespace"
 var defaultSecretName = "default-secret-name"
 
@@ -603,6 +609,7 @@ var complexIngress = slim_networkingv1.Ingress{
 		Name:        "dummy-ingress",
 		Namespace:   "dummy-namespace",
 		Annotations: testAnnotations,
+		Labels:      testLabels,
 		UID:         "d4bd3dc3-2ac5-4ab4-9dca-89c62c60177e",
 	},
 	Spec: slim_networkingv1.IngressSpec{

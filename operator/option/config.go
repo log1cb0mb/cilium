@@ -19,6 +19,8 @@ var log = logging.DefaultLogger.WithField(logfields.LogSubsys, "option")
 
 var IngressLBAnnotationsDefault = []string{"service.beta.kubernetes.io", "service.kubernetes.io", "cloud.google.com"}
 
+var IngressLBLabelsDefault = []string{"service.beta.kubernetes.io", "service.kubernetes.io", "cloud.google.com"}
+
 const (
 	// EndpointGCIntervalDefault is the default time for the CEP GC
 	EndpointGCIntervalDefault = 5 * time.Minute
@@ -319,6 +321,10 @@ const (
 	// from Ingress to the Load Balancer
 	IngressLBAnnotationPrefixes = "ingress-lb-annotation-prefixes"
 
+	// IngressLBLabelPrefixes are the labels which are needed to propagate
+	// from Ingress to the Load Balancer
+	IngressLBLabelPrefixes = "ingress-lb-label-prefixes"
+
 	// IngressSharedLBServiceName is the name of shared LB service name for Ingress.
 	IngressSharedLBServiceName = "ingress-shared-lb-service-name"
 
@@ -590,6 +596,10 @@ type OperatorConfig struct {
 	// which are used to filter annotations to propagate from Ingress to the Load Balancer
 	IngressLBAnnotationPrefixes []string
 
+	// IngressLBLabelPrefixes IngressLBLabels are the label prefixes,
+	// which are used to filter labels to propagate from Ingress to the Load Balancer
+	IngressLBLabelPrefixes []string
+
 	// IngressSharedLBServiceName is the name of shared LB service name for Ingress.
 	IngressSharedLBServiceName string
 
@@ -649,6 +659,7 @@ func (c *OperatorConfig) Populate(vp *viper.Viper) {
 	c.SetCiliumNodeTaints = vp.GetBool(SetCiliumNodeTaints)
 	c.SetCiliumIsUpCondition = vp.GetBool(SetCiliumIsUpCondition)
 	c.IngressLBAnnotationPrefixes = vp.GetStringSlice(IngressLBAnnotationPrefixes)
+	c.IngressLBLabelPrefixes = vp.GetStringSlice(IngressLBLabelPrefixes)
 	c.IngressSharedLBServiceName = vp.GetString(IngressSharedLBServiceName)
 	c.IngressDefaultLoadbalancerMode = vp.GetString(IngressDefaultLoadbalancerMode)
 	c.IngressDefaultSecretNamespace = vp.GetString(IngressDefaultSecretNamespace)

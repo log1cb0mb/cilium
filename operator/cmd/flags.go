@@ -333,6 +333,9 @@ func init() {
 	flags.StringSlice(operatorOption.IngressLBAnnotationPrefixes, operatorOption.IngressLBAnnotationsDefault, "Annotation prefixes for propagating from Ingress to the Load Balancer service")
 	option.BindEnv(Vp, operatorOption.IngressLBAnnotationPrefixes)
 
+	flags.StringSlice(operatorOption.IngressLBLabelPrefixes, operatorOption.IngressLBLabelsDefault, "Labels prefixes for propagating from Ingress to the Load Balancer service")
+	option.BindEnv(Vp, operatorOption.IngressLBLabelPrefixes)
+
 	flags.String(operatorOption.PodRestartSelector, "k8s-app=kube-dns", "cilium-operator will delete/restart any pods with these labels if the pod is not managed by Cilium. If this option is empty, then all pods may be restarted")
 	option.BindEnv(Vp, operatorOption.PodRestartSelector)
 

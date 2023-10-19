@@ -692,6 +692,7 @@ func (legacy *legacyOnLeader) onStart(_ hive.HookContext) error {
 			ingress.WithSecretsSyncEnabled(operatorOption.Config.EnableIngressSecretsSync),
 			ingress.WithSecretsNamespace(operatorOption.Config.IngressSecretsNamespace),
 			ingress.WithLBAnnotationPrefixes(operatorOption.Config.IngressLBAnnotationPrefixes),
+			ingress.WithLBLabelPrefixes(operatorOption.Config.IngressLBLabelPrefixes),
 			ingress.WithCiliumNamespace(operatorOption.Config.CiliumK8sNamespace),
 			ingress.WithSharedLBServiceName(operatorOption.Config.IngressSharedLBServiceName),
 			ingress.WithDefaultLoadbalancerMode(operatorOption.Config.IngressDefaultLoadbalancerMode),
