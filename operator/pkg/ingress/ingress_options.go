@@ -10,6 +10,7 @@ type Options struct {
 	EnabledSecretsSync      bool
 	SecretsNamespace        string
 	LBAnnotationPrefixes    []string
+	LBLabelPrefixes         []string
 	SharedLBServiceName     string
 	CiliumNamespace         string
 	DefaultLoadbalancerMode string
@@ -24,6 +25,7 @@ var DefaultIngressOptions = Options{
 	EnforcedHTTPS:           true,
 	EnabledSecretsSync:      true,
 	LBAnnotationPrefixes:    []string{},
+	LBLabelPrefixes:         []string{},
 	SharedLBServiceName:     "cilium-ingress",
 	CiliumNamespace:         "kube-system",
 	DefaultLoadbalancerMode: "shared",
@@ -69,6 +71,14 @@ func WithSecretsNamespace(secretsNamespace string) Option {
 func WithLBAnnotationPrefixes(lbAnnotationPrefixes []string) Option {
 	return func(o *Options) error {
 		o.LBAnnotationPrefixes = lbAnnotationPrefixes
+		return nil
+	}
+}
+
+// WithLBLabelPrefixes configures LB labels to be used for LB service
+func WithLBLabelPrefixes(lbLabelPrefixes []string) Option {
+	return func(o *Options) error {
+		o.LBLabelPrefixes = lbLabelPrefixes
 		return nil
 	}
 }
