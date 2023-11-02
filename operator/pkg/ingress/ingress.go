@@ -628,6 +628,17 @@ func (ic *Controller) regenerate(ing *slim_networkingv1.Ingress, forceShared boo
 				}
 			}
 		}
+		// Same lbAnnotationPrefixes config option is used for label propagation
+		for key, value := range ing.GetLabels() {
+			for _, prefix := range ic.lbAnnotationPrefixes {
+				if strings.HasPrefix(key, prefix) {
+					if svc.Labels == nil {
+						svc.Labels = make(map[string]string)
+					}
+					svc.Labels[key] = value
+				}
+			}
+		}
 	}
 	scopedLog.WithFields(logrus.Fields{
 		"ciliumEnvoyConfig": cec,
