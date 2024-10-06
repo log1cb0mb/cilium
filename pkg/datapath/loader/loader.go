@@ -21,7 +21,6 @@ import (
 
 	"github.com/cilium/cilium/pkg/bpf"
 	"github.com/cilium/cilium/pkg/byteorder"
-	"github.com/cilium/cilium/pkg/datapath/linux/linux_defaults"
 	"github.com/cilium/cilium/pkg/datapath/linux/route"
 	"github.com/cilium/cilium/pkg/datapath/linux/sysctl"
 	"github.com/cilium/cilium/pkg/datapath/loader/metrics"
@@ -122,7 +121,6 @@ func upsertEndpointRoute(ep datapath.Endpoint, ip net.IPNet) error {
 		Prefix: ip,
 		Device: ep.InterfaceName(),
 		Scope:  netlink.SCOPE_LINK,
-		Proto:  linux_defaults.RTProto,
 	}
 
 	return route.Upsert(endpointRoute)
